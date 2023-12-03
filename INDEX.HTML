@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin_Member_info</title>
+  <style>
+    /* Your CSS styles go here (unchanged from the previous examples) */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .search-bar {
+      margin-top: 10px;
+    }
+
+    .selected {
+      background-color: #ccc;
+    }
+
+    .pagination {
+      margin-top: 10px;
+    }
+
+    .action-button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: blue;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search...">
+    <button onclick="search()" class="search-icon">🔍</button>
+  </div>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Your data rows will go here -->
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <button onclick="changePage(-1)">Previous</button>
+    <button onclick="changePage(1)">Next</button>
+  </div>
+
+  <script>
+    // JavaScript code to handle actions
+
+    const table = document.getElementById('dataTable');
+    const tbody = table.getElementsByTagName('tbody')[0];
+    const itemsPerPage = 10;
+    let currentPage = 1;
+
+    // Sample user data
+    const userData = [
+      {
+        "id": "1",
+        "name": "Aaron Miles",
+        "email": "aaron@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "2",
+        "name": "Aishwarya Naik",
+        "email": "aishwarya@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "3",
+        "name": "Arvind Kumar",
+        "email": "arvind@mailinator.com",
+        "role": "admin"
+      },
+      // Add 20 fake names and emails
+      {
+        "id": "4",
+        "name": "Eva Johnson",
+        "email": "eva.johnson@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "5",
+        "name": "Alex Smith",
+        "email": "alex.smith@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "6",
+        "name": "Liam Brown",
+        "email": "liam.brown@mailinator.com",
+        "role": "admin"
+      },
+      {
+        "id": "7",
+        "name": "Olivia White",
+        "email": "olivia.white@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "8",
+        "name": "Noah Black",
+        "email": "noah.black@mailinator.com",
+        "role": "admin"
+      },
+      {
+        "id": "9",
+        "name": "Sophia Green",
+        "email": "sophia.green@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "10",
+        "name": "Jackson Red",
+        "email": "jackson.red@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "11",
+        "name": "Emma Blue",
+        "email": "emma.blue@mailinator.com",
+        "role": "admin"
+      },
+      {
+        "id": "12",
+        "name": "Aiden Yellow",
+        "email": "aiden.yellow@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "13",
+        "name": "Mia Purple",
+        "email": "mia.purple@mailinator.com",
+        "role": "admin"
+      },
+      {
+        "id": "14",
+        "name": "Lucas Gray",
+        "email": "lucas.gray@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "15",
+        "name": "Isabella Pink",
+        "email": "isabella.pink@mailinator.com",
+        "role": "admin"
+      },
+      {
+        "id": "16",
+        "name": "Ethan Orange",
+        "email": "ethan.orange@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "17",
+        "name": "Ava Brown",
+        "email": "ava.brown@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "18",
+        "name": "Mason Black",
+        "email": "mason.black@mailinator.com",
+        "role": "admin"
+      },
+      {
+        "id": "19",
+        "name": "Amelia Green",
+        "email": "amelia.green@mailinator.com",
+        "role": "member"
+      },
+      {
+        "id": "20",
+        "name": "Liam Yellow",
+        "email": "liam.yellow@mailinator.com",
+        "role": "admin"
+      },
+      {
+        "id": "21",
+        "name": "Isabella Pink",
+        "email": "isabella.pink@mailinator.com",
+        "role": "admin"
+      },
+    ];
+
+    // Initialize table with sorted user data
+    function initializeTable() {
+      const sortedUserData = userData.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+
+      sortedUserData.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${user.id}</td>
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>${user.role}</td>
+          <td>
+            <button onclick="editRow(this)">Edit</button>
+            <button onclick="deleteRow(this)">&#128465;</button> <!-- Replace "Delete" with a trash bin icon -->
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Display the first page
+      changePage(0);
+    }
+
+    function search() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+
+      for (let i = 0; i < tbody.rows.length; i++) {
+        const name = tbody.rows[i].cells[1].innerText.toLowerCase();
+        const email = tbody.rows[i].cells[2].innerText.toLowerCase();
+
+        if (name.includes(input) || email.includes(input)) {
+          tbody.rows[i].style.display = '';
+        } else {
+          tbody.rows[i].style.display = 'none';
+        }
+      }
+
+      // Reset to the first page after searching
+      currentPage = 1;
+      changePage(0);
+    }
+
+    function editRow(button) {
+      const row = button.closest('tr');
+      row.classList.toggle('edit-mode');
+      const actionButton = button.innerText === 'Edit' ? 'Save' : 'Edit';
+      button.innerText = actionButton;
+    }
+
+    function deleteRow(button) {
+      const row = button.closest('tr');
+      row.remove();
+    }
+
+    function changePage(direction) {
+      currentPage += direction;
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+
+      for (let i = 0; i < tbody.rows.length; i++) {
+        if (i >= start && i < end) {
+          tbody.rows[i].style.display = '';
+        } else {
+          tbody.rows[i].style.display = 'none';
+        }
+      }
+    }
+
+    // Initialize the table
+    initializeTable();
+  </script>
+
+</body>
+</html>
